@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>16連打チェッカー</title>
+    <script defer>
+        window.addEventListener('DOMContentLoaded', () => {
+            const scoreElement  = document.getElementById('score')
+            const shobonElement = document.getElementById('shobon')
+            const gameInfo = {
+                timestamps : [],
+                isGameClear: false,
+                okScore    : 16
+            }
+            
+            refresh(scoreElement, shobonElement, gameInfo)
+
+            document.body.addEventListener('mousedown', ev => {
+                if (gameInfo.isGameClear) { return }
+                click(gameInfo)
+                refresh(scoreElement, shobonElement, gameInfo)
+            })
+        })
+
+        const click = (gameInfo) => {
+            gameInfo.timestamps.push(Date.now() / 1000.0)
+        }
+
+        const refresh = (scoreElement, shobonElement, gameInfo) => {
+            const score = getScore(gameInfo)
+            updateScore (scoreElement , gameInfo, score)
+            updateShobon(shobonElement, gameInfo, score)
+        }
+
+        const updateScore = (element, gameInfo, score) => {
+            element.textContent = `Score: ${score}`
+        }
+
+        const updateShobon = (element, gameInfo, score) => {
+            if (score < gameInfo.okScore) {
+                element.textContent = '(´・ω・｀)'
+            }
+            else {
+                element.textContent = '＼(^o^)／'
+                gameInfo.isGameClear = true
+            }
+            element.style.color = 'black'
+            element.style.fontSize = `${30 + 70 * score / gameInfo.okScore}px`
+        }
+
+        const getScore = (gameInfo) => {
+            const length = gameInfo.timestamps.length
+            return length === 0 ? 0.0 :
+                length === 1 ? 1.0 :
+                length <= gameInfo.okScore ? (length - 1) / (gameInfo.timestamps[length - 1] - gameInfo.timestamps[0]) :
+                gameInfo.okScore / (gameInfo.timestamps[length - 1] - gameInfo.timestamps[length - gameInfo.okScore - 1])
+        }
+    </script>
+    <style>
+        html {
+            width : 100vw;
+            height: 100vh;
+            margin: 0;
+        }
+        body {
+            width : 100%;
+            height: 100%;
+            margin: 0;
+        }
+        #score {
+            position: fixed;
+            left: 20px;
+            top : 20px;
+            z-index: 0;
+            color: black;
+            font-size: 24pt;
+            user-select: none;
+        }
+        #shobon {
+            position: fixed;
+            inset: 0;
+            width : fit-content;
+            height: fit-content;
+            z-index: 1;
+            margin: auto;
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="score"></div>
+    <div id="shobon"></div>
+</body>
+</html>
